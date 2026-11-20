@@ -1,15 +1,18 @@
 import { v2 as cloudinary } from 'cloudinary'
 import streamifier from 'streamifier'
+import { ErroNegocio } from '../lib/erros'
 
 let configurado = false
 
 function configurar() {
   if (configurado) return
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  })
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim()
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim()
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim()
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new ErroNegocio(503, 'Envio de imagens indisponível.')
+  }
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret })
   configurado = true
 }
 
@@ -20,7 +23,7 @@ export function uploadParaCloudinary(buffer: Buffer): Promise<string> {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: 'tenis/fotos' },
       (error, result) => {
-        if (error || !result) reject(error)
+        if (error || !result?.secure_url) reject(new ErroNegocio(502, 'Não foi possível enviar a imagem ao Cloudinary.'))
         else resolve(result.secure_url)
       },
     )

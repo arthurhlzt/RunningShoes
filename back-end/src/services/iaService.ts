@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from '@google/genai'
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+import { z } from 'zod'
 
 export interface DadosIA {
   pontosFortes: string[]
@@ -32,6 +32,9 @@ const schemaTenis = {
 }
 
 export async function buscarDadosComGemini(marca: string, modelo: string): Promise<DadosIA> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim()
+  if (!apiKey) throw new Error('Consulta ao Gemini indisponível.')
+  const ai = new GoogleGenAI({ apiKey })
   const resposta = await ai.models.generateContent({
     model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     contents: `Tênis de corrida: ${marca} ${modelo}, versão comercializada no Brasil.
@@ -42,5 +45,9 @@ Liste os principais pontos fortes, os principais pontos fracos e o nível de amo
     },
   })
 
-  return JSON.parse(resposta.text || '{}') as DadosIA
+  return z.object({
+    pontosFortes: z.array(z.string().trim().min(1)),
+    pontosFracos: z.array(z.string().trim().min(1)),
+    amortecimento: z.enum(['BAIXO', 'MEDIO', 'ALTO']),
+  }).parse(JSON.parse(resposta.text || '{}'))
 }

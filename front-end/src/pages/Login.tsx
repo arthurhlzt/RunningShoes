@@ -34,24 +34,28 @@ export default function Login() {
       <h1 className="titulo text-4xl">Entrar</h1>
       {params.get('sessao') === 'expirada' && <Aviso>Sua sessão expirou. Entre novamente para continuar.</Aviso>}
 
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={async (resposta) => {
-            try {
-              if (!resposta.credential) throw new Error()
-              await loginGoogle(resposta.credential)
-              navigate(destino, { replace: true })
-            } catch (err) {
-              setErro(mensagemErro(err))
-            }
-          }}
-          onError={() => setErro('Não foi possível entrar com o Google. Tente novamente.')}
-          text="signin_with"
-          locale="pt-BR"
-        />
-      </div>
+      {import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() && (
+        <>
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={async (resposta) => {
+                try {
+                  if (!resposta.credential) throw new Error()
+                  await loginGoogle(resposta.credential)
+                  navigate(destino, { replace: true })
+                } catch (err) {
+                  setErro(mensagemErro(err))
+                }
+              }}
+              onError={() => setErro('Não foi possível entrar com o Google. Tente novamente.')}
+              text="signin_with"
+              locale="pt-BR"
+            />
+          </div>
 
-      <p className="text-center text-sm text-asfalto">ou use seu e-mail e senha</p>
+          <p className="text-center text-sm text-asfalto">ou use seu e-mail e senha</p>
+        </>
+      )}
 
       <form onSubmit={entrar} className="space-y-4">
         <div>

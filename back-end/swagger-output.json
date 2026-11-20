@@ -194,6 +194,9 @@
           },
           "500": {
             "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Login com Google indisponível."
           }
         },
         "requestBody": {

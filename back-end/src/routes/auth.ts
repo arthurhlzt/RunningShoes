@@ -127,31 +127,44 @@ router.post('/google', limitarTentativas, async (req, res) => {
     }
     #swagger.responses[200] = { description: 'Login realizado. Retorna o token e os dados do cliente.' }
     #swagger.responses[401] = { description: 'Token do Google inválido.' }
+    #swagger.responses[503] = { description: 'Login com Google indisponível.' }
   */
   try {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim()
+    if (!googleClientId) throw new ErroNegocio(503, 'Login com Google indisponível.')
+
     const { credential } = z.object({ credential: z.string().min(1) }).parse(req.body)
 
     // verifica assinatura, emissor (iss), destinatário (aud) e expiração (exp)
     const ticket = await googleClient
-      .verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID })
+      .verifyIdToken({ idToken: credential, audience: googleClientId })
       .catch(() => {
         throw new ErroNegocio(401, 'Token do Google inválido.')
       })
     const dados = ticket.getPayload()
-    if (!dados?.sub || !dados.email) throw new ErroNegocio(401, 'Token do Google inválido.')
+    if (!dados?.sub || !dados.email || dados.email_verified !== true) throw new ErroNegocio(401, 'Token do Google inválido.')
 
     const email = dados.email.toLowerCase()
-    let cliente = await prisma.cliente.findFirst({
-      where: { OR: [{ googleId: dados.sub }, { email }] },
-    })
+    let cliente = await prisma.cliente.findUnique({ where: { googleId: dados.sub } })
 
     if (!cliente) {
-      cliente = await prisma.cliente.create({
-        data: { nome: (dados.name ?? email).slice(0, 60), email, googleId: dados.sub },
-      })
-    } else if (!cliente.googleId) {
-      // já tinha cadastro com e-mail/senha: vincula a conta Google
-      cliente = await prisma.cliente.update({ where: { id: cliente.id }, data: { googleId: dados.sub } })
+      const cadastro = await prisma.cliente.findUnique({ where: { email } })
+      if (cadastro) {
+        // A titularidade de um endereço externo pode mudar fora do Google.
+        if (cadastro.googleId || (!email.endsWith('@gmail.com') && !dados.hd)) {
+          throw new ErroNegocio(409, 'Use o método de login do cadastro existente.')
+        }
+        const vinculo = await prisma.cliente.updateMany({
+          where: { id: cadastro.id, googleId: null },
+          data: { googleId: dados.sub },
+        })
+        if (vinculo.count !== 1) throw new ErroNegocio(409, 'Tente entrar novamente.')
+        cliente = cadastro
+      } else {
+        cliente = await prisma.cliente.create({
+          data: { nome: (dados.name ?? email).slice(0, 60), email, googleId: dados.sub },
+        })
+      }
     }
 
     const token = gerarToken({ id: cliente.id, tipo: 'CLIENTE' })
