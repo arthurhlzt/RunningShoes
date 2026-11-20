@@ -1,6 +1,6 @@
 import type { Distancia, Entrega, Genero, StatusPedido, Terreno } from '../types'
 
-export const NOME_LOJA = 'Passada'
+export const NOME_LOJA = 'Running Shoes'
 
 export const brl = (valor: number | string) =>
   Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

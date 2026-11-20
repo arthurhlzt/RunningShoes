@@ -1,4 +1,4 @@
-# Passada – Estoque e venda de tênis de corrida
+# Running Shoes – Estoque e venda de tênis de corrida
 
 Trabalho de Programação Full Stack (ADS). Loja virtual de tênis de corrida das marcas
 Olympikus, Adidas, Nike, Asics, New Balance e Fila, com controle de estoque por modelo,

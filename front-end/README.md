@@ -1,4 +1,4 @@
-# Front-end – Loja de Tênis de Corrida (Passada)
+# Front-end – Loja de Tênis de Corrida (Running Shoes)
 
 Vite + React + TypeScript + React Router + Axios + Tailwind CSS v4.
 Consome a API `loja-tenis-back`.
@@ -55,4 +55,4 @@ src/
   pages/admin/  AdminLogin, AdminDashboard, AdminTenis, AdminEstoque, AdminPedidos, AdminMarcas
 ```
 
-O nome da loja ("Passada") fica em `src/lib/format.ts` (`NOME_LOJA`) e no `index.html`.
+O nome da loja ("Running Shoes") fica em `src/lib/format.ts` (`NOME_LOJA`) e no `index.html`.
