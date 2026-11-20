@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Barlow", system-ui, sans-serif;
+
+  --color-pista: #f1f2ee;
+  --color-papel: #fafaf7;
+  --color-tinta: #15202b;
+  --color-asfalto: #5b6470;
+  --color-linha: #d8dad2;
+  --color-raia: #2447c9;
+  --color-raia-escura: #1a37a0;
+  --color-sinal: #e6f25a;
+  --color-alerta: #b42318;
+}
+
+@layer base {
+  body {
+    @apply bg-pista text-tinta font-sans antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-raia);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primario {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-raia text-white hover:bg-raia-escura;
+  }
+  .btn-contorno {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 border border-tinta/30 text-tinta hover:border-tinta hover:bg-papel;
+  }
+  .btn-perigo {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 border border-alerta/40 text-alerta hover:bg-alerta hover:text-white;
+  }
+  .btn-pequeno {
+    @apply px-3 py-1.5 text-sm;
+  }
+  .campo {
+    @apply w-full rounded-md border border-linha bg-papel px-3 py-2.5 text-tinta placeholder:text-asfalto/70;
+  }
+  .rotulo {
+    @apply mb-1 block text-sm font-medium text-tinta;
+  }
+  .titulo {
+    @apply font-display font-bold tracking-tight;
+  }
+}
