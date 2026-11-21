@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import FotoTenis from '../components/FotoTenis'
 import { useAuth } from '../context/AuthContext'
 import { useCarrinho } from '../context/CarrinhoContext'
 import { brl } from '../lib/format'
@@ -34,7 +35,7 @@ export default function Carrinho() {
       <ul className="divide-y divide-linha rounded-sm border border-linha bg-papel">
         {itens.map((i) => (
           <li key={i.variacaoId} className="flex flex-wrap items-center gap-4 p-4">
-            <img src={i.foto} alt="" className="h-20 w-20 rounded-sm bg-white object-contain" />
+            <FotoTenis src={i.foto} alt="" className="h-20 w-20 shrink-0 rounded-sm" />
             <div className="min-w-40 flex-1">
               <Link to={`/tenis/${i.tenisId}`} className="titulo text-xl hover:text-raia">
                 {i.marca} {i.modelo}

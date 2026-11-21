@@ -75,7 +75,7 @@ router.get('/', async (req, res) => {
     const tenis = await prisma.tenis.findMany({
       where,
       include: { marca: true, variacoes: { orderBy: [{ tamanho: 'asc' }, { cor: 'asc' }] } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ marca: { nome: 'asc' } }, { modelo: 'asc' }, { id: 'asc' }],
     })
     res.json(tenis)
   } catch (error) {

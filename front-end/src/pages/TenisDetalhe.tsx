@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import FotoTenis from '../components/FotoTenis'
 import { Link, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import { useCarrinho } from '../context/CarrinhoContext'
@@ -60,7 +61,7 @@ export default function TenisDetalhe() {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="aspect-square rounded-sm border border-linha bg-white">
-        <img src={fotoSelecionada} alt={`${tenis.marca.nome} ${tenis.modelo}${cor ? ` — ${cor}` : ''}`} className="h-full w-full object-contain p-6" />
+        <FotoTenis src={fotoSelecionada} alt={`${tenis.marca.nome} ${tenis.modelo}${cor ? ` — ${cor}` : ''}`} className="h-full w-full" padding="p-6" />
       </div>
 
       <div className="space-y-6">
