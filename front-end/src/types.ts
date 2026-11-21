@@ -33,6 +33,7 @@ export interface Tenis {
   drop: number
   peso: number
   foto: string
+  fotosPorCor?: Record<string, string>
   pontosFortes: string[]
   pontosFracos: string[]
   amortecimento: string | null

@@ -50,7 +50,7 @@ async function maisVendidos(limite: number) {
 
 async function estoqueBaixo(limite: number) {
   const variacoes = await prisma.variacao.findMany({
-    where: { quantidade: { lte: limite } },
+    where: { quantidade: { lte: limite }, tenis: { ativo: true } },
     include: { tenis: { include: { marca: true } } },
     orderBy: [{ quantidade: 'asc' }, { tenisId: 'asc' }],
     take: 20,

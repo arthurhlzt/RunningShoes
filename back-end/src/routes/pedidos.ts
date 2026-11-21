@@ -93,9 +93,11 @@ router.post('/', autenticar, apenasCliente, async (req, res) => {
         })
         if (!variacao) throw new ErroNegocio(404, `Variação ${variacaoId} não encontrada.`)
 
+        if (!variacao.tenis.ativo) throw new ErroNegocio(409, 'Este tênis saiu do catálogo.')
+
         // baixa condicional: só decrementa se houver estoque suficiente
         const baixa = await tx.variacao.updateMany({
-          where: { id: variacaoId, quantidade: { gte: quantidade } },
+          where: { id: variacaoId, tenis: { ativo: true }, quantidade: { gte: quantidade } },
           data: { quantidade: { decrement: quantidade } },
         })
         if (baixa.count === 0) {

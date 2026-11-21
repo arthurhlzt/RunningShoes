@@ -31,7 +31,7 @@ const tenisSchema = z.object({
   genero: z.enum(generos),
   terreno: z.enum(terrenos),
   distancia: z.enum(distancias),
-  drop: z.coerce.number().int().min(0).max(20),
+  drop: z.coerce.number().min(0).max(20),
   peso: z.coerce.number().int().positive('Peso (g) deve ser maior que zero'),
   marcaId: z.coerce.number().int().positive(),
 })
@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
   */
   try {
     const { busca, ...filtros } = filtroSchema.parse(req.query)
-    const where: Prisma.TenisWhereInput = { ...filtros }
+    const where: Prisma.TenisWhereInput = { ativo: true, ...filtros }
     if (busca) where.modelo = { contains: busca, mode: 'insensitive' }
 
     const tenis = await prisma.tenis.findMany({
@@ -92,7 +92,7 @@ router.get('/:id', async (req, res) => {
       where: { id: Number(req.params.id) },
       include: { marca: true, variacoes: { orderBy: [{ tamanho: 'asc' }, { cor: 'asc' }] } },
     })
-    if (!tenis) throw new ErroNegocio(404, 'Tênis não encontrado.')
+    if (!tenis?.ativo) throw new ErroNegocio(404, 'Tênis não encontrado.')
     res.json(tenis)
   } catch (error) {
     tratarErro(res, error)
@@ -120,7 +120,7 @@ router.post('/', autenticar, apenasAdmin, upload.single('foto'), async (req, res
               genero: { type: 'string', enum: ['MASCULINO', 'FEMININO', 'UNISSEX'] },
               terreno: { type: 'string', enum: ['ASFALTO', 'TRILHA'] },
               distancia: { type: 'string', enum: ['CINCO_K', 'DEZ_K', 'MARATONA'] },
-              drop: { type: 'integer', description: 'Drop em mm', example: 10 },
+              drop: { type: 'number', description: 'Drop em mm', example: 10 },
               peso: { type: 'integer', description: 'Peso em gramas', example: 290 },
               marcaId: { type: 'integer', example: 1 }
             }

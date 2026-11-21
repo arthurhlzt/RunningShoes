@@ -157,7 +157,7 @@ export default function AdminTenis() {
             </div>
             <div>
               <label htmlFor="drop" className="rotulo">Drop (mm)</label>
-              <input id="drop" type="number" required min="0" max="20" className="campo" value={form.drop} onChange={(e) => atualizar('drop', e.target.value)} />
+              <input id="drop" type="number" required min="0" max="20" step="any" className="campo" value={form.drop} onChange={(e) => atualizar('drop', e.target.value)} />
             </div>
             <div>
               <label htmlFor="peso" className="rotulo">Peso (g)</label>

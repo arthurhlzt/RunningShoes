@@ -559,7 +559,7 @@
                     ]
                   },
                   "drop": {
-                    "type": "integer",
+                    "type": "number",
                     "description": "Drop em mm",
                     "example": 10
                   },

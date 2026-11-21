@@ -107,3 +107,7 @@ Use a migração versionada e um banco Neon dedicado à loja.
 - Segurança: `helmet` (cabeçalhos) e limite de 20 tentativas falhas por IP a cada 15 min nas rotas de login e cadastro.
 - Foi escrito sem acesso ao banco/Prisma neste ambiente: rode `npx prisma generate`
   e `npm run typecheck` ao abrir o projeto.
+
+## Atualizar o catálogo de demonstração
+
+Depois de aplicar as migrações e disponibilizar os arquivos de front-end em `public/catalogo`, execute `npx prisma db execute --schema prisma/schema.prisma --file prisma/catalogo.sql` na pasta back-end. O script pode ser executado novamente sem duplicar produtos ou repor o estoque existente. Os modelos antigos do seed com a imagem de demonstração saem da vitrine, mantendo os vínculos com pedidos. Preços e estoque dos novos cadastros são ilustrativos.

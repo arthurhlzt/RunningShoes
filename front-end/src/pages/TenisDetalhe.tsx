@@ -20,9 +20,11 @@ export default function TenisDetalhe() {
       .get<Tenis>(`/tenis/${id}`)
       .then((r) => {
         setTenis(r.data)
-        // começa na primeira cor que ainda tem estoque
+        const capa = r.data.variacoes.find((v) =>
+          v.quantidade > 0 && r.data.fotosPorCor?.[v.cor] === r.data.foto,
+        )
         const comEstoque = r.data.variacoes.find((v) => v.quantidade > 0)
-        setCor(comEstoque?.cor ?? r.data.variacoes[0]?.cor ?? '')
+        setCor(capa?.cor ?? comEstoque?.cor ?? r.data.variacoes[0]?.cor ?? '')
       })
       .catch((e) => setErro(mensagemErro(e)))
   }, [id])
@@ -37,6 +39,8 @@ export default function TenisDetalhe() {
   if (erro) return <Aviso>{erro}</Aviso>
   if (!tenis) return <p className="text-asfalto">Carregando…</p>
 
+  const fotoSelecionada = tenis.fotosPorCor?.[cor] ?? tenis.foto
+
   function colocarNoCarrinho() {
     if (!tenis || !escolhida) return
     adicionar({
@@ -44,7 +48,7 @@ export default function TenisDetalhe() {
       tenisId: tenis.id,
       modelo: tenis.modelo,
       marca: tenis.marca.nome,
-      foto: tenis.foto,
+      foto: fotoSelecionada,
       tamanho: escolhida.tamanho,
       cor: escolhida.cor,
       preco: Number(tenis.preco),
@@ -56,7 +60,7 @@ export default function TenisDetalhe() {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="aspect-square rounded-sm border border-linha bg-white">
-        <img src={tenis.foto} alt={`${tenis.marca.nome} ${tenis.modelo}`} className="h-full w-full object-contain p-6" />
+        <img src={fotoSelecionada} alt={`${tenis.marca.nome} ${tenis.modelo}${cor ? ` — ${cor}` : ''}`} className="h-full w-full object-contain p-6" />
       </div>
 
       <div className="space-y-6">

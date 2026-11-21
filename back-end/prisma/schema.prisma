@@ -47,9 +47,11 @@ model Tenis {
   genero    Genero
   terreno   Terreno
   distancia Distancia
-  drop      Int // em mm
+  drop      Float // em mm
   peso      Int // em gramas
-  foto      String // URL do Cloudinary
+  foto      String // foto principal
+  fotosPorCor Json   @default("{}")
+  ativo       Boolean @default(true)
 
   // preenchidos pela IA (Gemini) no cadastro; podem ficar vazios se ela falhar
   pontosFortes  String[]
