@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import BotaoVoltar from './BotaoVoltar'
 import { useAuth } from '../context/AuthContext'
 import { useCarrinho } from '../context/CarrinhoContext'
 import { NOME_LOJA } from '../lib/format'
@@ -45,6 +46,7 @@ export default function Layout() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+        <BotaoVoltar />
         <Outlet />
       </main>
 

@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import BotaoVoltar from './BotaoVoltar'
 import { useAuth } from '../context/AuthContext'
 import { NOME_LOJA } from '../lib/format'
 
@@ -40,6 +41,7 @@ export default function AdminLayout() {
         </nav>
       </aside>
       <main className="min-w-0 flex-1 p-5 md:p-8">
+        <BotaoVoltar painel />
         <Outlet />
       </main>
     </div>
