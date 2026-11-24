@@ -4,6 +4,11 @@ Trabalho de Programação Full Stack (ADS). Loja virtual de tênis de corrida da
 Olympikus, Adidas, Nike, Asics, New Balance e Fila, com controle de estoque por modelo,
 tamanho e cor, pedidos e painel administrativo.
 
+- [Loja publicada na Vercel](https://running-shoes-loja.vercel.app/)
+- [API no Render](https://running-shoes-api-ozrd.onrender.com/) e [Swagger](https://running-shoes-api-ozrd.onrender.com/docs/)
+
+A versão inicial foi gerada com o Claude. A evolução, os ajustes e a validação foram conduzidos por prompts, testes locais e conferência no ambiente publicado.
+
 ```
 loja-tenis-corrida/
   README.md       este arquivo (visão geral, decisões e roteiro)
@@ -17,12 +22,12 @@ loja-tenis-corrida/
 |---|---|
 | Modelo de venda | Loja virtual (carrinho e pedido) |
 | Estoque | Por variação: modelo + tamanho + cor |
-| Baixa de estoque | Ao criar o pedido (reserva na hora); cancelar devolve o estoque |
+| Baixa de estoque | Ao criar o pedido, o estoque é reservado. O cancelamento devolve as unidades. |
 | Pagamento | Simulado: o admin avança o status (PENDENTE, PAGO, ENVIADO) |
 | Entrega | Endereço completo informado no checkout (CEP preenche rua, bairro, cidade e UF via ViaCEP) e gravado no próprio pedido |
 | Perfis | Cliente (Login Social Google ou e-mail/senha) e Administrador (e-mail/senha) |
-| Fotos | Uma por tênis (Multer + Cloudinary) |
-| IA (Gemini) | Consultada uma vez no cadastro e salva no banco: pontos fortes, pontos fracos e amortecimento. Se falhar, o cadastro segue sem esses dados. Tipo de pisada foi descartado (é característica da pessoa, não do tênis) |
+| Fotos | Capa e fotos por cor no catálogo de demonstração. Multer e Cloudinary no upload pelo painel. |
+| IA (Gemini) | A consulta no cadastro salva pontos fortes, pontos fracos e amortecimento. O administrador pode consultar novamente. Se a IA falhar, o cadastro segue sem os dados gerados. |
 | Campos do tênis | Marca, modelo, preço, gênero, terreno (asfalto/trilha), distância (5K/10K/maratona), drop e peso |
 | Dashboard (admin) | Faturamento por mês, vendas por marca, mais vendidos, estoque baixo por variação e pedidos por status |
 | Front-end | Context API (Auth e Carrinho separados) + LocalStorage; Vite + React + TypeScript + React Router + Axios + Tailwind |
@@ -39,7 +44,7 @@ Context API + LocalStorage · Consulta com IA (Gemini) · Deploy (Render + Verce
 ## Como rodar localmente
 
 **Pré-requisito:** projeto no Neon com um **database novo** (ex.: `loja_tenis`), para não
-misturar com tabelas de outros trabalhos (o `prisma migrate dev` pede reset se o banco não estiver vazio).
+misturar com tabelas de outros trabalhos.
 
 ### 1. Back-end
 
@@ -47,8 +52,9 @@ misturar com tabelas de outros trabalhos (o `prisma migrate dev` pede reset se o
 cd back-end
 npm install
 cp .env.example .env        # preencha (veja abaixo)
-npx prisma migrate dev --name init
-npm run seed
+npx prisma migrate deploy   # aplica as migrações versionadas
+npx prisma generate         # gera o Prisma Client
+npm run seed                # dados fictícios, somente no banco de desenvolvimento
 npm run swagger
 npm run dev                 # http://localhost:3000  (docs em /docs)
 ```
@@ -79,55 +85,14 @@ npm run dev                 # http://localhost:5173
 
 No Google Cloud, `http://localhost:5173` deve estar em "Origens JavaScript autorizadas" do cliente OAuth.
 
-## Checklist de validação (antes do deploy)
+## Validação
 
-**Banco e API**
-- [ ] `npm run dev` sobe sem erro (o client do Prisma é gerado pelo `migrate dev`)
-- [ ] `migrate dev` cria as 7 tabelas sem pedir reset
-- [ ] `npm run seed` conclui; tabelas `marcas`, `tenis`, `variacoes`, `clientes`, `admins`, `pedidos`, `itens_pedido` com dados no painel do Neon
-- [ ] `/docs` abre e lista as rotas principais
-- [ ] `POST /auth/admin/login` devolve token; com ele, `GET /dashboard` responde
+- **Conferido em produção** — 18 modelos de seis marcas, 54 fotos, 324 variações e filtros da API. A vitrine e a navegação com **Voltar** também foram conferidas na Vercel.
+- **Fluxo do cliente** — login por senha e Google, seleção de cor e tamanho, carrinho, checkout com ViaCEP, pedido no histórico e cancelamento. O pagamento é simulado.
+- **Fluxo administrativo** — login e acesso autenticado ao dashboard. A API recebeu o cadastro com JPEG e a foto foi servida pelo Cloudinary. Uma reconsulta ao Gemini gravou pontos fortes, pontos fracos e amortecimento.
+- **Conferido em ambiente local** — migração em banco vazio, recusa de pedido acima do estoque, cancelamento simultâneo com uma única devolução, sessão expirada, limite de tentativas de login e os cinco painéis do dashboard.
+- **Cobertura complementar** — ainda há cenários a testar na interface, como edição de marcas e variações, endereço no painel de pedidos, tamanhos sem estoque e transição até envio. Também falta simular uma falha do Gemini em ambiente de teste e conferir o cadastro sem os dados gerados.
 
-**Fluxo do cliente**
-- [ ] Cadastro e login com e-mail/senha
-- [ ] Login com Google (cria o cliente na primeira vez)
-- [ ] Vitrine com filtro por distância, marca, gênero e terreno
-- [ ] Detalhe: escolher cor e tamanho; tamanho sem estoque fica desabilitado
-- [ ] Carrinho persiste ao recarregar a página (F5)
-- [ ] Checkout: CEP preenche o endereço; telefone e campos obrigatórios são validados
-- [ ] Finalizar pedido: estoque da variação diminui
-- [ ] Pedido com quantidade maior que o estoque é recusado, sem gravar nada
-- [ ] Cancelar pedido: status CANCELADO e estoque devolvido
+## Publicação
 
-**Fluxo do administrador**
-- [ ] Login em `/admin/login`; cliente não acessa `/admin`
-- [ ] Token inválido/expirado: o front volta ao login com o aviso "Sua sessão expirou"
-- [ ] 21 tentativas de login erradas seguidas: a API responde 429 (depois de 15 min libera)
-- [ ] Cadastrar tênis com foto: imagem vai ao Cloudinary e a IA preenche pontos fortes/fracos e amortecimento
-- [ ] Com a chave da IA inválida: o tênis ainda é salvo, e "Consultar IA" refaz depois
-- [ ] Cadastrar e ajustar variações (tamanho + cor + quantidade)
-- [ ] Pedidos do admin mostram telefone e endereço de entrega
-- [ ] Avançar status do pedido: PENDENTE, PAGO, ENVIADO
-- [ ] Dashboard mostra os 5 painéis (faturamento por mês, status, marca, mais vendidos, estoque baixo)
-
-## Verificações já feitas (neste ambiente, sem banco)
-
-- Front-end: `npm run build` passa (TypeScript + bundle).
-- Contrato front x back: as 27 chamadas de API do front têm rota correspondente no back (mesmo método e caminho).
-- Swagger: `npm run swagger` gera 18 rotas, todas com tag; corpos JSON, upload multipart (campo `foto` como arquivo) e Bearer conferidos.
-- Back-end: checagem de tipos sem erros além dos que dependem do client do Prisma, que só existe depois de `prisma generate`/`migrate dev`.
-
-**Só passa a ser verificado quando você rodar:** conexão com o Neon, migração, seed, transações de
-pedido/cancelamento, Login Social, Cloudinary, Gemini e a aparência das telas no navegador.
-
-## Próxima etapa: deploy
-
-Depois da validação local: **Render** (back-end, Web Service) e **Vercel** (front-end).
-O roteiro com variáveis, comandos de build/start e ajustes (CORS, origens do Google,
-URL no Swagger) está em `back-end/README.md`, na seção "Deploy".
-
-Já preparado para o deploy:
-- `front-end/vercel.json` (rewrite para o React Router: recarregar `/admin` ou `/carrinho` não dá 404).
-- `prisma` em `dependencies` e `engines.node >= 20` (o build do Render roda `prisma generate` e `migrate deploy`).
-- `swagger-output.json` incluído (precisa estar no repositório; ao publicar, troque `servers.url` no `swagger.ts` pela URL do Render e rode `npm run swagger`).
-- `trust proxy` ativado para o limite de tentativas enxergar o IP real atrás do Render.
+A Vercel publica o frontend na pasta `front-end`. O Render executa a API e aplica as migrações no Neon. Os comandos e as variáveis estão no [README da API](./back-end/README.md). O Swagger usa a origem da API em que é aberto.

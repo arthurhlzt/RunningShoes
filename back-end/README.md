@@ -77,7 +77,7 @@ Rotas protegidas usam o header `Authorization: Bearer <token>`.
 - **Entrega:** `POST /pedidos` exige o endereço (`entrega`: telefone, CEP, logradouro, número, complemento opcional, bairro, cidade e UF), gravado no próprio pedido.
 - **IA:** consultada uma vez no cadastro e salva no banco. Se falhar, o tênis é salvo sem
   os dados da IA (use `/tenis/:id/reconsultar-ia` depois).
-- **Dashboard:** pedidos `CANCELADO` não entram em faturamento nem em vendas.
+- **Dashboard:** faturamento, vendas por marca e itens mais vendidos consideram pedidos `PAGO` ou `ENVIADO`. O agrupamento mensal usa a data de criação do pedido.
 
 ## Deploy no Render e na Vercel
 
@@ -85,9 +85,10 @@ Use a migração versionada e um banco Neon dedicado à loja.
 
 **Render (Web Service com banco Neon)**
 
-- Root Directory: `back-end`
-- Build Command: `npm ci && npm run build` (roda `prisma generate` e `prisma migrate deploy`)
-- Start Command: `npm start`
+- [API publicada](https://running-shoes-api-ozrd.onrender.com/) e [Swagger](https://running-shoes-api-ozrd.onrender.com/docs/).
+- Root Directory: raiz do repositório (campo vazio).
+- Build Command: `npm --prefix back-end ci --include=dev && npm --prefix back-end run build` (gera o Prisma Client e aplica as migrações).
+- Start Command: `npm --prefix back-end start`
 - Variáveis: `DATABASE_URL` (com pooler), `DIRECT_URL` (sem pooler; o `migrate deploy` usa), `JWT_KEY`, `GOOGLE_CLIENT_ID`, `GEMINI_API_KEY`, `GEMINI_MODEL`,
   `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`,
   `FRONT_URL` (URL da Vercel; aceita várias separadas por vírgula).
@@ -105,8 +106,7 @@ Use a migração versionada e um banco Neon dedicado à loja.
 - O pacote `tsx` está em `dependencies` para o `npm start` funcionar no Render sem compilar.
 - O pacote `prisma` está em `dependencies` para o build do Render conseguir rodar `prisma generate` e `migrate deploy`.
 - Segurança: `helmet` (cabeçalhos) e limite de 20 tentativas falhas por IP a cada 15 min nas rotas de login e cadastro.
-- Foi escrito sem acesso ao banco/Prisma neste ambiente: rode `npx prisma generate`
-  e `npm run typecheck` ao abrir o projeto.
+- Para conferir os tipos localmente, rode `npx prisma generate` e `npm run typecheck`.
 
 ## Atualizar o catálogo de demonstração
 
